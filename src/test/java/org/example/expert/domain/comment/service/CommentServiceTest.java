@@ -40,7 +40,8 @@ class CommentServiceTest {
         CommentSaveRequest request = new CommentSaveRequest("contents");
         AuthUser authUser = new AuthUser(1L, "email", UserRole.USER);
 
-        given(todoRepository.findById(anyLong())).willReturn(Optional.empty());
+        // 특정 ID에 대한 테스트를 위해 anyLong() -> todoId로 변경
+        given(todoRepository.findById(todoId)).willReturn(Optional.empty());
 
         // when
         ServerException exception = assertThrows(ServerException.class, () -> {
