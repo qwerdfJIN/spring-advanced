@@ -9,6 +9,7 @@ import org.springframework.web.servlet.HandlerInterceptor; // Interceptor의 기
 import java.time.LocalDateTime; // 현재 날짜와 시간을 가져오는 기능
 
 @Slf4j // 로깅(Logger) 기능을 자동으로 활성화
+@Component
 public class AdminInterceptor implements HandlerInterceptor {
 
     // Interceptor가 실행될 때 자동으로 실행되는 함수
