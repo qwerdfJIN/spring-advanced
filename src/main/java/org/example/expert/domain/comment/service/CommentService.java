@@ -2,6 +2,7 @@ package org.example.expert.domain.comment.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.expert.domain.comment.dto.request.CommentSaveRequest;
+import org.example.expert.domain.comment.dto.request.CommentUpdateRequest;
 import org.example.expert.domain.comment.dto.response.CommentResponse;
 import org.example.expert.domain.comment.dto.response.CommentSaveResponse;
 import org.example.expert.domain.comment.entity.Comment;
@@ -27,9 +28,12 @@ public class CommentService {
 
     @Transactional
     public CommentSaveResponse saveComment(AuthUser authUser, long todoId, CommentSaveRequest commentSaveRequest) {
-        User user = User.fromAuthUser(authUser);
+
+        // Todo 존재 여부를 먼저 확인하여 불필요한 유저 객체 생성을 방지
         Todo todo = todoRepository.findById(todoId).orElseThrow(() ->
                 new InvalidRequestException("Todo not found"));
+
+        User user = User.fromAuthUser(authUser);
 
         Comment newComment = new Comment(
                 commentSaveRequest.getContents(),
@@ -61,5 +65,39 @@ public class CommentService {
             dtoList.add(dto);
         }
         return dtoList;
+    }
+
+    @Transactional
+    public CommentResponse updateComment(AuthUser authUser, long commentId, CommentUpdateRequest request) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new InvalidRequestException("Comment not found"));
+
+        User user = User.fromAuthUser(authUser);
+
+        if (!comment.getUser().getId().equals(user.getId())) {
+            throw new InvalidRequestException("수정 권한이 없습니다.");
+        }
+
+        comment.update(request.getContents());
+        commentRepository.save(comment);
+
+        return new CommentResponse(
+                comment.getId(),
+                comment.getContents(),
+                new UserResponse(user.getId(), user.getEmail())
+        );
+    }
+
+    public void deleteComment(AuthUser authUser, long commentId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new InvalidRequestException("Comment not found"));
+
+        User user = User.fromAuthUser(authUser);
+
+        if (!comment.getUser().getId().equals(user.getId())) {
+            throw new InvalidRequestException("삭제 권한이 없습니다.");
+        }
+
+        commentRepository.delete(comment);
     }
 }
