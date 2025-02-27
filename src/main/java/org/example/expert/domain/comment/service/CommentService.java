@@ -88,6 +88,7 @@ public class CommentService {
         );
     }
 
+    @Transactional
     public void deleteComment(AuthUser authUser, long commentId) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new InvalidRequestException("Comment not found"));
